@@ -1,0 +1,3 @@
+data inflasi dari https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG untuk Consumer Price Index(CPI)
+
+inflation data from https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG for Consumer Price Index(CPI)

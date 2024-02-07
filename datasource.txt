@@ -1,0 +1,6 @@
+https://www.alphavantage.co/
+https://rapidapi.com/alphavantage/api/alpha-vantage
+https://finance.yahoo.com/
+https://data.worldbank.org/indicator/NY.GDP.MKTP.CD
+https://data.worldbank.org/indicator/NY.GDP.MKTP.PP.CD
+https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG
