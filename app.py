@@ -2,55 +2,133 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import streamlit as st
+from numerize.numerize import numerize
 
-def get_appl_monthly_stock_data():
-    stocks = pd.read_csv('aapl/static_3_years_monthly_stock_adjusted.csv')
-    # stocks = stocks.set_index(pd.DatetimeIndex(stocks['date'].values))
-    # stocks.drop(['date'], inplace=True)
-    return stocks
+apple = pd.read_csv('aapl/price_data.csv')
 
-def get_sp500_monthly_stock_data():
-    stocks = pd.read_csv('static_3_years_sp500_monthly.csv')
-    return stocks
+amazon = pd.read_csv('amzn/price_data.csv')
 
-apple = get_appl_monthly_stock_data()
+google = pd.read_csv('googl/price_data.csv')
 
-sp500 = get_sp500_monthly_stock_data()
+meta = pd.read_csv('meta/price_data.csv')
 
-return_percentage_apple = (apple['adjusted close'].iloc[-1] - apple['adjusted close'].iloc[0]) / apple['adjusted close'].iloc[0]
-return_percentage_sp500 = (sp500['Adj Close'].iloc[-1] - sp500['Adj Close'].iloc[0]) / sp500['Adj Close'].iloc[0]
+microsoft = pd.read_csv('msft/price_data.csv')
 
+nvidia = pd.read_csv('nvda/price_data.csv')
 
+def calculate_historical_return(starting_price: float, ending_price: float):
+    return (ending_price - starting_price) / starting_price
 
+def final_investment_value(initial_investent: float|int, historical_return: float):
+    return initial_investent * (1 + historical_return)
+
+###
 # streamlit code start here
+###
+
+# Header
+st.header("Perbandingan *historical return* Saham Perusahaan dan Index")
 
 
-st.title("Perbandingan Return Historical Saham Apple dan S&P 500 pada Tahun 2021 - 2024")
+# Pendahuluan
+st.subheader("Pendahuluan")
 
-st.header("Pendahuluan")
+"""
+- *Historical return* adalah performa masa lampau dari sekuritas/index.
+- *Historical return* digunakan sebagai salah satu data yang digunakan analis dan investor untuk 
+memperkirakan return sekuritas/index pada masa depan. 
+- Investor dapat memperkirakan *historical return*  dari investasi apapun, seperti: 
+    - sekuritas
+    - rumah
+    - real estate
+    - reksa dana
+    - etf
+    - komoditasi
+      - emas
+      - bahan pangan
+      - minyak
+      - listrik
+      - air
+"""
 
-st.write("""
-    Return historical adalah nilai return dari sekuritas atau index pada masa lampau. Analisa
-    return historical adalah salah satu data yang dapat digunakan untuk memprediksi performa sekuritas
-    pada masa depan. Pada laporan ini, terdapat 1 sekuritas dan 1 index yang akan dibandingkan nilai
-    return historikalnya, apple dan s&p 500
-""")
+# Saham dan Index
+st.subheader("Saham")
 
+"""
+Berikut adalah Saham yang dipilih untuk dianalisa *historical return*-nya
+- apple
+- amazon
+- google
+- meta
+- nvidia
+- microsoft
+"""
 
-apple_adjusted_close_chart = alt.Chart(apple).mark_line().encode(
-    x='date',
-    y='adjusted close',
-).configure_axisX(labelAngle=0)
+closing_prices = pd.DataFrame({
+    'date': apple['date'],
+    'apple': apple['adjusted close'],
+    'amazon': amazon['adjusted close'],
+    'google': google['adjusted close'],
+    'meta': meta['adjusted close'],
+    'nvidia': nvidia['adjusted close'],
+    'microsoft': microsoft['adjusted close']
+})
 
-st.altair_chart(apple_adjusted_close_chart)
+melted = closing_prices.melt(id_vars='date', value_vars=['apple', 'amazon', 'google', 'meta', 'nvidia', 'microsoft'])
 
-sp500_adjusted_close_chart = alt.Chart(sp500).mark_line().encode(
+melted = melted.rename(
+    columns={
+        'date': 'Date',
+        'value': 'Adjusted Close',
+        'variable': 'Stocks'
+    })
+
+# https://altair-viz.github.io/gallery/line_chart_with_custom_legend.html
+adjusted_close_chart = alt.Chart(melted).mark_line().encode(
     x='Date',
-    y='Adj Close'
-).configure_axisX(labelAngle=0)
+    y='Adjusted Close',
+    color='Stocks'
+).properties(
+    width=704,
+)
 
-st.altair_chart(sp500_adjusted_close_chart)
+adjusted_close_chart = adjusted_close_chart.configure_axisX(labelAngle=0)
 
-nilai_investasi = st.number_input('Nilai investasi awal', value=1000)
-st.write('jumlah uang terakhir apple setelah selesai dalam $', (nilai_investasi + (nilai_investasi * return_percentage_apple)))
-st.write('jumlah uang terakhir s&p 500 setelah selesai dalam $', (nilai_investasi + (nilai_investasi * return_percentage_sp500)))
+st.altair_chart(adjusted_close_chart)
+
+roi_apple = calculate_historical_return(closing_prices['apple'].iloc[0], closing_prices['apple'].iloc[-1])
+roi_amazon = calculate_historical_return(closing_prices['amazon'].iloc[0], closing_prices['amazon'].iloc[-1])
+roi_google = calculate_historical_return(closing_prices['google'].iloc[0], closing_prices['google'].iloc[-1])
+roi_meta = calculate_historical_return(closing_prices['meta'].iloc[0], closing_prices['meta'].iloc[-1])
+roi_nvidia = calculate_historical_return(closing_prices['nvidia'].iloc[0], closing_prices['nvidia'].iloc[-1])
+roi_microsoft = calculate_historical_return(closing_prices['microsoft'].iloc[0], closing_prices['microsoft'].iloc[-1])
+
+roi_raw_table = [
+    ('apple', roi_apple),
+    ('amazon', roi_amazon),
+    ('google', roi_google),
+    ('meta', roi_meta),
+    ('nvidia', roi_nvidia),
+    ('microsoft', roi_microsoft)
+]
+
+roi_dataframe = pd.DataFrame(data=roi_raw_table, columns=['stock', 'roi'])
+
+st.bar_chart(data=roi_dataframe, x='stock', y='roi')
+
+# Analisa
+st.subheader("Analisa")
+
+initial_investment = st.number_input('Nilai investasi awal', value=1000)
+
+final_investment_apple = final_investment_value(initial_investment, roi_apple)
+numerized_apple = numerize(final_investment_apple)
+
+st.metric(label='Apple', value=numerized_apple)
+
+# Kesimpulan
+st.subheader("Kesimpulan")
+
+
+
+
