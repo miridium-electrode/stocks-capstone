@@ -16,10 +16,10 @@ microsoft = pd.read_csv('msft/price_data.csv')
 
 nvidia = pd.read_csv('nvda/price_data.csv')
 
-def calculate_historical_return(starting_price: float, ending_price: float):
+def calculate_historical_return(starting_price, ending_price):
     return (ending_price - starting_price) / starting_price
 
-def final_investment_value(initial_investment: float|int, historical_return: float):
+def final_investment_value(initial_investment, historical_return):
     return initial_investment * (1 + historical_return)
 
 ###
