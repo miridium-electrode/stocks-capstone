@@ -66,11 +66,12 @@ st.subheader("Rumus *Historical Return*")
 untuk kalkulasi *historical return* dapat menggunakan rumus ini
 
 $$
-\\text{historical return} = \\frac{\\text{harga investasi akhir} - \\text{harga investasi awal}}{\\text{harga saham awal}}
+\\text{historical return} = \\frac{\\text{harga investasi akhir} - \\text{harga investasi awal}}{\\text{harga investasi awal}}
 $$
 
-harga saham akhir adalah harga investasi pada periode waktu akhir yang dipilih dan 
-harga saham awal adalah harga saham yang dipilih pada periode waktu awal. Harga saham yang dipilih
+Harga investasi akhir adalah harga investasi pada periode waktu akhir yang dipilih dan 
+harga investasi awal adalah harga investasi yang dipilih pada periode waktu awal. Jika 
+investasi yang dipilih adalah saham, harga saham dipilih
 adalah harga *adjusted close* yaitu harga saham yang sudah dikalkulasikan berdasarkan *stock split*
 dan dividen
 """
@@ -80,8 +81,9 @@ st.subheader("Data Perusahaan")
 
 
 """
-Ada 6 perusahaan teknologi yang dipilih untuk pencarian nilai *historical return*
-Info singkat dari perusahaan:
+Sebagai demonstrasi, 6 perusahaan dipilih untuk mengkalkulasi dan membandingkan nilai *historical return*-nya.
+Berikut profil singkat perusahaan tersebut:
+
 - **Apple Inc.**
 
   perusahaan teknologi multinasional amerika yang menjual alat elektronik konsumen dan 
@@ -114,6 +116,16 @@ Info singkat dari perusahaan:
   perusahaan multinasional amerika yang terkenal dengan sistem operasi windows dan
   perangkat lunak sepert Microsoft 365 dan edge browser
 
+  
+ada 3 alasan kenapa perusahaan ini dipilih dan periodenya 5 tahun dari 2024:
+1. 6 perusahaan ini adalah perusahaan teknologi. Dengan AI menjadi trend pada
+masa ini (tahun 2024), maka perusahaan ini adalah pilihan yang menarik bagaimana
+harga saham mereka bereaksi dengan AI. 6 perusahaan ini menggunakan atau bergerak
+dalam bidang AI
+2. Walaupun ada perusahaan lain yang juga bergerak dan menggunakan AI. Jumlah
+perusahaan yang dianalisa dibatasi menjadi 6 supaya tidak membingungkan
+3. Data ini diambil dari API *free tier* Alpha Vantage. Ada batasan dalam menggunakan
+*free tier* sehingga tidak bisa mengambil data terlalu banyak
 """
 
 # Analisa
@@ -151,10 +163,16 @@ adjusted_close_chart = alt.Chart(melted).mark_line().encode(
 adjusted_close_chart = adjusted_close_chart.configure_axisX(labelAngle=0)
 
 """
-berikut adalah data saham harga jual 6 perusahaan
+Sebelum kalkulasi nilai historical return, berikut informasi harga 
+*adjusted close* perusahaan selama 5 tahun mulai dari 2019
 """
 
 st.altair_chart(adjusted_close_chart)
+
+"""
+Sumbu x menampilkan tanggal dan sumbu y menampilkan harga *adjusted close*
+berdasarkan tanggal.
+"""
 
 historical_return_apple = calculate_historical_return(closing_prices['apple'].iloc[0], closing_prices['apple'].iloc[-1])
 historical_return_amazon = calculate_historical_return(closing_prices['amazon'].iloc[0], closing_prices['amazon'].iloc[-1])
@@ -196,12 +214,29 @@ hist_res_chart = hist_res_chart.configure_range(
 )
 
 """
-berikut adalah data return historical 6 perusahaan
+Setelah itu kita kalkulasikan nilai historical return dan menampilkannya
+dalam bentuk diagram batang
 """
 
 st.altair_chart(hist_res_chart)
 
-initial_investment = st.number_input('Nilai investasi awal', value=1000)
+"""
+Sumbu x menampilkan nama perusahaan dan sumbu y menampilkan nilai 
+*historical return* dari perusahaan
+"""
+
+"""
+untuk menggunakan nilai dari historical return, misal ingin melakukan
+investasi. Nilai investasi akhir didapatkan dengan menggunakan rumus
+berikut:
+$$
+\\text{Nilai Investasi Akhir} = \\text{Nilai Investasi Awal} \\times (1 + \\text{Historical Return})
+$$
+dengan asumsi investasi dilakukan satu kali pada awal tanggal, tidak
+menghitung inflasi dan pajak. Berikut contoh penggunaanya
+"""
+
+initial_investment = st.number_input('Nilai Investasi Awal:', value=1000)
 
 final_investment_apple = final_investment_value(initial_investment, historical_return_apple)
 numerized_apple = numerize(final_investment_apple)
@@ -220,6 +255,7 @@ numerized_nvidia = numerize(final_investment_nvidia)
 
 final_investment_microsoft = final_investment_value(initial_investment, historical_return_microsoft)
 numerized_microsoft = numerize(final_investment_microsoft)
+
 
 col1, col2, col3 = st.columns(3)
 
@@ -248,8 +284,9 @@ with col6:
 st.subheader("Kesimpulan")
 
 """
-sebagai salah satu informasi yang dapat digunakan untuk menganalisa
-performa perusahaan di masa depan
-
-analisa ini menunjukkan pola yang pada saham perusahaan
+*Historical value* adalah informasi cepat yang investor/
+analis bisa dapatkan pada investasi mereka. Walaupun memiliki
+banyak kekurangan, informasi ini dapat dipakai sebagai bagian dari
+analisis komprehensif atau sebagai filter untuk mencari investasi
+yang sesuai dengan kebutuhan investor/analis
 """
